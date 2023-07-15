@@ -3,12 +3,17 @@ from tkinter import ttk
 from wikiScraper import *
 import numpy as np
 import matplotlib.pyplot as plt
+import wikiScraper as scp
 
 champNames = getChampList()
 
-def generateGraph(data:np.array):
-    #TODO: EDIT 
-    plt.plot(data)
+def generateGraph1(data:np.array):
+    #TODO: EDIT
+    
+    print(data[0,:,0])
+    for champion in data:
+        plt.plot(champion[:,0])
+
     plt.show()
 
 
@@ -28,8 +33,16 @@ def genInterface():
     statString = StringVar(value="Champion Stat")
     statSelect = ttk.Combobox(inputDataFrame, textvariable=statString)
     statSelect.grid(row=0,column=0)
-
     statSelect['values'] = champNames
+    statSelect.get()
+    
+
+    
+    Button(inputDataFrame, text="Make Graph",
+           command=lambda: generateGraph1(scp.getChampStats(10))).grid(row=6, column=2)
+
+
+
 
     root.mainloop()
 

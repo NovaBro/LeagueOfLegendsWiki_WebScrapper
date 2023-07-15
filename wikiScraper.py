@@ -9,15 +9,52 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+op = webdriver.ChromeOptions()
+op.add_argument('headless')
+
+def getSpecChampStats(champName:str):
+    #The 18 is for 18 levels, 1 is for the number of stats
+    champStats = np.zeros((18, 1)) 
+
+    driver = webdriver.Chrome(options=op)
+    champListUrl = "https://leagueoflegends.fandom.com/wiki/List_of_champions"
+    driver.get(champListUrl)
+
+    selectedElement = (driver.find_element(By.CLASS_NAME, "sitenotice-wrapper__header")
+                .find_element(By.TAG_NAME, "svg").find_element(By.TAG_NAME, "use"))
+    selectedElement.click()#close notification tabf
+
+    #Finds champion table
+    selElement0 = driver.find_element(By.XPATH, "//*[@id='mw-content-text']/div[1]/table/tbody").\
+        find_element(By.CSS_SELECTOR, f"[data-sort-value='{champName}']")
+    champURL = selElement0.find_element(By.TAG_NAME, "span").\
+        find_element(By.TAG_NAME, "span").find_element(By.TAG_NAME, "a").get_attribute("href")
+    
+    tempDriver = webdriver.Chrome(options=op)
+    tempDriver.get(champURL)
+
+    #TODO: Add more data, this is just for health
+    data = (tempDriver.find_element(By.XPATH, '//*[@id="mw-content-text"]/div[1]/div[8]/aside/section[1]/section[1]/section/div[1]').
+                find_elements(By.TAG_NAME, "span")[1].get_attribute("innerText"))
+    data = data.rsplit(sep=" – ")
+    champStats[0][0] = int(data[0]) 
+    champStats[1][0] = int(data[1]) 
+
+    tempDriver.quit()
+    return champStats
+    
+print(getSpecChampStats("Bard"))
 
 def getChampStats(numChamps):
     champStats = np.zeros((numChamps, 2, 1)) 
     #TODO: ^^^8 is for num stats, currently 1 for development
     #The 2 is for 2 levels, lvl 1 and lvl 18
     champCounter = 0
-    driver = webdriver.Chrome()
+
+    driver = webdriver.Chrome(options=op)
     champListUrl = "https://leagueoflegends.fandom.com/wiki/List_of_champions"
     driver.get(champListUrl)
+
     selectedElement = (driver.find_element(By.CLASS_NAME, "sitenotice-wrapper__header")
                 .find_element(By.TAG_NAME, "svg").find_element(By.TAG_NAME, "use"))
     selectedElement.click() #close notification tab
@@ -35,7 +72,7 @@ def getChampStats(numChamps):
         
         #Need to recreate a new driver, or else using website navigation will leave "selElement" stale
         #TODO: Could probably open link in a new window or tab, probably be more efficient? IDK still works without
-        tempDriver = webdriver.Chrome()
+        tempDriver = webdriver.Chrome(options=op)
         tempDriver.get(link)
         print(tempDriver.find_element(By.TAG_NAME, "head").find_element(By.TAG_NAME, "title").get_attribute("innerText"))
         print(tempDriver.find_element(By.XPATH, '//*[@id="mw-content-text"]/div[1]/div[8]').get_dom_attribute("class"))
@@ -58,7 +95,7 @@ def getChampStats(numChamps):
     driver.quit()
     return champStats
     
-print(getChampStats(4))
+#print(getChampStats(4))
 
 
 def test():
@@ -78,7 +115,7 @@ def test():
 
 def getChampList():
     champList = []
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=op)
     driver.get("https://leagueoflegends.fandom.com/wiki/List_of_champions")
     selElement0 = driver.find_element(By.XPATH, "//*[@id='mw-content-text']/div[1]/table/tbody").find_elements(By.TAG_NAME, "tr")
     for tr in selElement0:
