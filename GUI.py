@@ -4,26 +4,32 @@ from wikiScraper import *
 import numpy as np
 import matplotlib.pyplot as plt
 import wikiScraper as scp
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 champNames = getChampList()
+champData = np.zeros((163, 1))
+selectedNames = []
 
-def generateGraph1(data:np.array):
+
+def plotChamp(data:np.array, inputDataFrame:ttk.Frame):
     #TODO: EDIT
+    fig = plt.figure()
+    newPlot = fig.add_subplot(111)
+    newPlot.plot(data)
+
+    canvas = FigureCanvasTkAgg(fig, inputDataFrame)
+    canvas.draw()
+    canvas.get_tk_widget().grid(row=0, column=2)
+
+
+
+def genInterface(name:str):
+    global champNames, selectedNames
+    selectedNames.append(name)
     
-    print(data[0,:,0])
-    for champion in data:
-        plt.plot(champion[:,0])
-
-    plt.show()
-
-def plotChamp(data:np.array):
-    plt.plot(data)
-    plt.show()
-
-def genInterface():
-    global champNames
+    
     root = Tk()
-    root.geometry("800x500")
+    root.geometry("1200x500")
     root.title("LOL STATS")
 
     inputDataFrame = ttk.Frame(root)
@@ -37,16 +43,14 @@ def genInterface():
     statSelect.grid(row=0,column=0)
     statSelect['values'] = champNames
     #NOTE: cannot store the get() value of combobox in variable here for some reason... must get it """""fresh"""""
-
-    Button(inputDataFrame, text="select",
-           command=lambda: plotChamp(scp.getSpecChampStats(statSelect.get()))).grid(row=0, column=1)
+    Button(inputDataFrame, text="Select",
+           command=lambda: plotChamp(scp.getSpecChampStats(statSelect.get()), inputDataFrame)).grid(row=0, column=1)
     
-    Button(inputDataFrame, text="Make Graph",
-           command=lambda: generateGraph1(scp.getChampStats(10))).grid(row=6, column=2)
-
-
-
-
+    Button(inputDataFrame, text="Graph",
+           command=lambda: plotChamp(scp.getSpecChampStats(statSelect.get()), inputDataFrame)).grid(row=0, column=1)
+    
+    
     root.mainloop()
+    
 
 genInterface()

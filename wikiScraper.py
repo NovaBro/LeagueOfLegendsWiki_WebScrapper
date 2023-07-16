@@ -128,8 +128,6 @@ def test():
     
     print(driver.current_url)
 
-
-
 def getChampList():
     champList = []
     driver = webdriver.Chrome(options=op)
