@@ -57,9 +57,11 @@ def getSpecChampStats(champName:str):
         champStats[lvl - 2][0] = (data)
 
     tempDriver.quit()
+    driver.quit()
     return champStats
     
 
+#NOTE: Depricated FunctionVVV
 def getChampStats(numChamps):
     champStats = np.zeros((numChamps, 2, 1)) 
     #TODO: ^^^8 is for num stats, currently 1 for development

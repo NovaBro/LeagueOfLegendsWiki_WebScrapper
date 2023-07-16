@@ -16,7 +16,9 @@ def generateGraph1(data:np.array):
 
     plt.show()
 
-
+def plotChamp(data:np.array):
+    plt.plot(data)
+    plt.show()
 
 def genInterface():
     global champNames
@@ -34,9 +36,10 @@ def genInterface():
     statSelect = ttk.Combobox(inputDataFrame, textvariable=statString)
     statSelect.grid(row=0,column=0)
     statSelect['values'] = champNames
-    statSelect.get()
-    
+    #NOTE: cannot store the get() value of combobox in variable here for some reason... must get it """""fresh"""""
 
+    Button(inputDataFrame, text="select",
+           command=lambda: plotChamp(scp.getSpecChampStats(statSelect.get()))).grid(row=0, column=1)
     
     Button(inputDataFrame, text="Make Graph",
            command=lambda: generateGraph1(scp.getChampStats(10))).grid(row=6, column=2)
