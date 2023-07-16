@@ -24,8 +24,14 @@ def simpleExample():
     driver.get("https://leagueoflegends.fandom.com/wiki/Aatrox/LoL")
     selectedElement = driver.find_element(By.ID, "lvl_Aatrox")
     select = Select(selectedElement).select_by_index(3)
-    selectedElement = driver.find_element(By.ID, "AttackDamage_Aatrox_lvl")
-    print(selectedElement.text)
+    #selectedElement = driver.find_element(By.ID, "AttackDamage_Aatrox_lvl")
+    print(driver.find_element(By.CSS_SELECTOR, "#mw-content-text").find_element(By.CSS_SELECTOR, "div.mw-parser-output").\
+                    find_element(By.CSS_SELECTOR, "div.lvlselect.lvlselect-initialized").find_element(By.CSS_SELECTOR, "aside").\
+                    find_element(By.CSS_SELECTOR, "section:nth-child(2)").find_element(By.CSS_SELECTOR, "section:nth-child(1)").\
+                    find_element(By.TAG_NAME, "section").find_element(By.CSS_SELECTOR, "div:nth-child(1)").\
+                    find_elements(By.TAG_NAME, "span")[1].get_attribute("innerText"))
+
+    #print(selectedElement.text)
     driver.quit()
 
 simpleExample()

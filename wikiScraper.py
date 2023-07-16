@@ -32,18 +32,33 @@ def getSpecChampStats(champName:str):
     
     tempDriver = webdriver.Chrome(options=op)
     tempDriver.get(champURL)
+    print(champURL)
 
-    #TODO: Add more data, this is just for health
-    data = (tempDriver.find_element(By.XPATH, '//*[@id="mw-content-text"]/div[1]/div[8]/aside/section[1]/section[1]/section/div[1]').
-                find_elements(By.TAG_NAME, "span")[1].get_attribute("innerText"))
-    data = data.rsplit(sep=" – ")
-    champStats[0][0] = int(data[0]) 
-    champStats[1][0] = int(data[1]) 
+    #Grabs the select option of champion stats
+    ##mw-content-text > div.mw-parser-output > div.lvlselect.lvlselect-initialized > aside > h2 > div
+    selElement1 = tempDriver.find_element(By.CSS_SELECTOR, "#mw-content-text").find_element(By.CSS_SELECTOR, "div.mw-parser-output").\
+                    find_element(By.CSS_SELECTOR, "div.lvlselect.lvlselect-initialized").find_element(By.CSS_SELECTOR, "aside").\
+                    find_element(By.CSS_SELECTOR, "h2").find_element(By.CSS_SELECTOR, "div").\
+                    find_element(By.TAG_NAME, "select")
+
+    for lvl in range(2, 20):
+        selectOpt = Select(selElement1)
+        selectOpt.select_by_index(lvl)
+        #TODO: Add more data, this is just for health
+        #By.XPATH, '//*[@id="mw-content-text"]/div[1]/div[8]/aside/section[1]/section[1]/section/div[1]'
+        ##mw-content-text > div.mw-parser-output > div.lvlselect.lvlselect-initialized > aside > section:nth-child(2) > section:nth-child(1) > section > div:nth-child(1)
+
+        data = tempDriver.find_element(By.CSS_SELECTOR, "#mw-content-text").find_element(By.CSS_SELECTOR, "div.mw-parser-output").\
+                    find_element(By.CSS_SELECTOR, "div.lvlselect.lvlselect-initialized").find_element(By.CSS_SELECTOR, "aside").\
+                    find_element(By.CSS_SELECTOR, "section:nth-child(2)").find_element(By.CSS_SELECTOR, "section:nth-child(1)").\
+                    find_element(By.TAG_NAME, "section").find_element(By.CSS_SELECTOR, "div:nth-child(1)").\
+                    find_elements(By.TAG_NAME, "span")[1].get_attribute("innerText")
+        
+        champStats[lvl - 2][0] = (data)
 
     tempDriver.quit()
     return champStats
     
-print(getSpecChampStats("Bard"))
 
 def getChampStats(numChamps):
     champStats = np.zeros((numChamps, 2, 1)) 
