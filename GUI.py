@@ -15,14 +15,17 @@ def plotChamp(inputDataFrame:ttk.Frame):
     #TODO: EDIT Get More Stats
     global selectedNames, champData
     fig = plt.figure()
-    newPlot = fig.add_subplot(111)
-    for i in range(len(selectedNames)):
-        champStats = scp.getSpecChampStats(selectedNames[i])
-        line, = newPlot.plot(champStats)
-        line.set_label(selectedNames[i])
+    for i in range(10):
+        newPlot = fig.add_subplot(111)
+
+        for c in range(len(selectedNames)):#TODO: EDIT THIS FOR MORE STATS
+            champStats = scp.getSpecChampStats(selectedNames[c])
+            line, = newPlot.plot(champStats)
+            line.set_label(selectedNames[c])
 
     newPlot.legend()
     newPlot.set_title("Health")
+    newPlot.set_xticks(range(0, 20))
 
     canvas = FigureCanvasTkAgg(fig, inputDataFrame)
     canvas.draw()
