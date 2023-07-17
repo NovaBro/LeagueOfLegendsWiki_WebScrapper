@@ -11,10 +11,11 @@ from selenium.webdriver.support import expected_conditions as EC
 
 op = webdriver.ChromeOptions()
 op.add_argument('headless')
+numStats = 7
 
 def getSpecChampStats(champName:str):
     #The 18 is for 18 levels, 1 is for the number of stats
-    champStats = np.zeros((18, 7)) 
+    champStats = np.zeros((18, numStats)) 
 
     driver = webdriver.Chrome(options=op)
     champListUrl = "https://leagueoflegends.fandom.com/wiki/List_of_champions"
@@ -46,7 +47,7 @@ def getSpecChampStats(champName:str):
     for lvl in range(2, 20): #LVL range
         selectOpt = Select(selElement1)
         selectOpt.select_by_index(lvl)
-        data = np.zeros((7))
+        data = np.zeros((numStats))
         
         #This loops iteratees through some of the stats of the champion
         #There is this weird loop cause I do not want to collect all the data, since the HTML structure is not uniform
@@ -57,15 +58,24 @@ def getSpecChampStats(champName:str):
                 if s == 3 and d == 1 : 
                     runLoop = False
                     break
-                colectedData = tempDriver.find_element(By.CSS_SELECTOR, "#mw-content-text").find_element(By.CSS_SELECTOR, "div.mw-parser-output").\
-                            find_element(By.CSS_SELECTOR, "div.lvlselect.lvlselect-initialized").find_element(By.CSS_SELECTOR, "aside").\
-                            find_element(By.CSS_SELECTOR, "section:nth-child(2)").find_element(By.CSS_SELECTOR, f"section:nth-child({(s+1)})").\
-                            find_element(By.TAG_NAME, "section").find_element(By.CSS_SELECTOR, f"div:nth-child({(d+1)})").\
-                            find_elements(By.TAG_NAME, "span")[1].get_attribute("innerText")
+                #print(s,"||", d)
+                try:
+                    colectedData = tempDriver.find_element(By.CSS_SELECTOR, "#mw-content-text").find_element(By.CSS_SELECTOR, "div.mw-parser-output").\
+                        find_element(By.CSS_SELECTOR, "div.lvlselect.lvlselect-initialized").find_element(By.CSS_SELECTOR, "aside").\
+                        find_element(By.CSS_SELECTOR, "section:nth-child(2)").find_element(By.CSS_SELECTOR, f"section:nth-child({(s+1)})").\
+                        find_element(By.TAG_NAME, "section").find_element(By.CSS_SELECTOR, f"div:nth-child({(d+1)})").\
+                        find_elements(By.TAG_NAME, "span")[1].get_attribute("innerText")
                 #//*[@id="mw-content-text"]/div[1]/div[9]/aside/section[1]/section[1]/section/div[1].get_dom_attribute("class")
                 #^^^ this is the original xPath, however does not work, idk why div[8] is needed and not div[9]... indexing seems
                 #like the problem, inconsistant. https://www.w3schools.com/xml/xpath_syntax.asp
-                if colectedData == "N/A": colectedData = 0
+                except:
+                    colectedData = tempDriver.find_element(By.CSS_SELECTOR, "#mw-content-text").find_element(By.CSS_SELECTOR, "div.mw-parser-output").\
+                        find_element(By.CSS_SELECTOR, "div.lvlselect.lvlselect-initialized").find_element(By.CSS_SELECTOR, "aside").\
+                        find_element(By.CSS_SELECTOR, "section:nth-child(2)").find_element(By.CSS_SELECTOR, f"section:nth-child({(s+1)})").\
+                        find_element(By.TAG_NAME, "section").find_element(By.CSS_SELECTOR, f"div:nth-child({(d+1)})").\
+                        get_dom_attribute("innerText")#get_attribute("innerText")
+
+                if colectedData == "N/A" or colectedData == "" or colectedData == None: colectedData = 0
                 data[(s * 2 + d)] = (colectedData)
         
         champStats[lvl - 2] = (data)
@@ -74,7 +84,7 @@ def getSpecChampStats(champName:str):
     driver.quit()
     return champStats
 
-#print(getSpecChampStats("Bard"))
+#print(getSpecChampStats("Akali"))
 
 def test():
     driver = webdriver.Chrome()
