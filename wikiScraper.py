@@ -30,6 +30,8 @@ def getSpecChampStats(champName:str):
     champURL = selElement0.find_element(By.TAG_NAME, "span").\
         find_element(By.TAG_NAME, "span").find_element(By.TAG_NAME, "a").get_attribute("href")
     
+    #Need to recreate a new driver, or else using website navigation will leave "selElement" stale
+    #TODO: Could probably open link in a new window or tab, probably be more efficient? IDK still works without
     tempDriver = webdriver.Chrome(options=op)
     tempDriver.get(champURL)
     print(champURL)
@@ -48,72 +50,21 @@ def getSpecChampStats(champName:str):
         #By.XPATH, '//*[@id="mw-content-text"]/div[1]/div[8]/aside/section[1]/section[1]/section/div[1]'
         ##mw-content-text > div.mw-parser-output > div.lvlselect.lvlselect-initialized > aside > section:nth-child(2) > section:nth-child(1) > section > div:nth-child(1)
 
+        #TODO: Add more data, this is just for health
         data = tempDriver.find_element(By.CSS_SELECTOR, "#mw-content-text").find_element(By.CSS_SELECTOR, "div.mw-parser-output").\
                     find_element(By.CSS_SELECTOR, "div.lvlselect.lvlselect-initialized").find_element(By.CSS_SELECTOR, "aside").\
                     find_element(By.CSS_SELECTOR, "section:nth-child(2)").find_element(By.CSS_SELECTOR, "section:nth-child(1)").\
                     find_element(By.TAG_NAME, "section").find_element(By.CSS_SELECTOR, "div:nth-child(1)").\
                     find_elements(By.TAG_NAME, "span")[1].get_attribute("innerText")
+        #//*[@id="mw-content-text"]/div[1]/div[9]/aside/section[1]/section[1]/section/div[1].get_dom_attribute("class")
+        #^^^ this is the original xPath, however does not work, idk why div[8] is needed and not div[9]... indexing seems
+        #like the problem, inconsistant. https://www.w3schools.com/xml/xpath_syntax.asp
         
         champStats[lvl - 2][0] = (data)
 
     tempDriver.quit()
     driver.quit()
     return champStats
-    
-
-#NOTE: Depricated FunctionVVV
-def getChampStats(numChamps):
-    champStats = np.zeros((numChamps, 2, 1)) 
-    #TODO: ^^^8 is for num stats, currently 1 for development
-    #The 2 is for 2 levels, lvl 1 and lvl 18
-    champCounter = 0
-
-    driver = webdriver.Chrome(options=op)
-    champListUrl = "https://leagueoflegends.fandom.com/wiki/List_of_champions"
-    driver.get(champListUrl)
-
-    selectedElement = (driver.find_element(By.CLASS_NAME, "sitenotice-wrapper__header")
-                .find_element(By.TAG_NAME, "svg").find_element(By.TAG_NAME, "use"))
-    selectedElement.click() #close notification tab
-
-    #Finds champion table
-    selElement0 = driver.find_element(By.XPATH, "//*[@id='mw-content-text']/div[1]/table/tbody").find_elements(By.TAG_NAME, "tr") 
-    for tr in selElement0:
-        if champCounter == numChamps: break
-        #Find champion page link
-        time.sleep(0.2)
-        selectedElement = (tr.find_element(By.TAG_NAME, "td").find_element(By.TAG_NAME, "span").
-                    find_element(By.TAG_NAME, "span").find_element(By.TAG_NAME, "a"))
-        link = selectedElement.get_attribute("href")
-        print(link)
-        
-        #Need to recreate a new driver, or else using website navigation will leave "selElement" stale
-        #TODO: Could probably open link in a new window or tab, probably be more efficient? IDK still works without
-        tempDriver = webdriver.Chrome(options=op)
-        tempDriver.get(link)
-        print(tempDriver.find_element(By.TAG_NAME, "head").find_element(By.TAG_NAME, "title").get_attribute("innerText"))
-        print(tempDriver.find_element(By.XPATH, '//*[@id="mw-content-text"]/div[1]/div[8]').get_dom_attribute("class"))
-
-        #TODO: Add more data, this is just for health
-        data = (tempDriver.find_element(By.XPATH, '//*[@id="mw-content-text"]/div[1]/div[8]/aside/section[1]/section[1]/section/div[1]').
-                find_elements(By.TAG_NAME, "span")[1].get_attribute("innerText"))
-        #//*[@id="mw-content-text"]/div[1]/div[9]/aside/section[1]/section[1]/section/div[1].get_dom_attribute("class")
-        #^^^ this is the original xPath, however does not work, idk why div[8] is needed and not div[9]... indexing seems
-        #like the problem, inconsistant. https://www.w3schools.com/xml/xpath_syntax.asp
-        
-        #TODO: VV make more generalizable for more stats
-        data = data.rsplit(sep=" – ")
-        champStats[champCounter][0][0] = int(data[0]) 
-        champStats[champCounter][1][0] = int(data[1]) 
-
-        tempDriver.quit()
-        champCounter += 1
-    
-    driver.quit()
-    return champStats
-    
-#print(getChampStats(4))
-
 
 def test():
     driver = webdriver.Chrome()
