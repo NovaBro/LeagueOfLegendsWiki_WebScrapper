@@ -12,18 +12,21 @@ selectedNames = []
 champListLabel = "No Champions Selected"
 
 def plotChamp(inputDataFrame:ttk.Frame):
-    #TODO: EDIT
+    #TODO: EDIT Get More Stats
     global selectedNames, champData
     fig = plt.figure()
     newPlot = fig.add_subplot(111)
     for i in range(len(selectedNames)):
         champStats = scp.getSpecChampStats(selectedNames[i])
-        newPlot.plot(champStats)
+        line, = newPlot.plot(champStats)
+        line.set_label(selectedNames[i])
 
+    newPlot.legend()
+    newPlot.set_title("Health")
 
     canvas = FigureCanvasTkAgg(fig, inputDataFrame)
     canvas.draw()
-    canvas.get_tk_widget().pack()#grid(row=0, column=2, rowspan=10)
+    canvas.get_tk_widget().grid(row=0, column=2, rowspan=40)
 
 def selectButton(name:str, label:Label):
     global selectedNames, champListLabel
@@ -60,7 +63,7 @@ def genInterface():
 
     charList = Label(inputDataFrame)
     charList.config(text=champListLabel)
-    charList.grid(row=3,column=0, rowspan=5)
+    charList.grid(row=4,column=0, rowspan=5)
     
     Button(inputDataFrame, text="Select",
            command=lambda: selectButton(statSelect.get(), charList)).grid(row=1, column=1)
