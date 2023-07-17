@@ -12,16 +12,16 @@ selectedNames = []
 champListLabel = "No Champions Selected"
 statList = ["Health", "Mana", "Health Regen", "Mana Regen", "Armor", "Attack", "Magic Resist"]
 xlvls = np.arange(1,19)
-
+numOfStats = 1
 
 def generateSubplots(fig:plt.figure):
     subplotList = []
-    for i in range(numStats):
-        newPlot = fig.add_subplot(3, 3, (i + 1))
+    for i in range(numOfStats):
+        newPlot = fig.add_subplot(1, 1, (i + 1))
         subplotList.append(newPlot)
     return subplotList
 
-def plotChamp(inputDataFrame:ttk.Frame):
+def plotChamp(inputDataFrame:ttk.Frame, statSelected:str):
     #TODO: EDIT Get More Stats
     global selectedNames, champData, xlvls, statList
     fig = plt.figure(figsize=(10,8))
@@ -30,8 +30,9 @@ def plotChamp(inputDataFrame:ttk.Frame):
     for c in range(len(selectedNames)):#TODO: EDIT THIS FOR MORE STATS
         champStats = scp.getSpecChampStats(selectedNames[c])
 
-        for i in range(numStats):
-            newPlot = subplotList[i]
+        for i in range(numOfStats):
+            i = statList.index(statSelected)
+            newPlot = subplotList[0]
             line, = newPlot.step(xlvls, champStats[:, i], where="pre")
             line.set_label(selectedNames[c])
 
@@ -79,16 +80,17 @@ def genInterface():
     charList = Label(inputDataFrame)
     charList.config(text=champListLabel)
     charList.grid(row=4,column=0, rowspan=5)
+
+    statString2 = StringVar(value="Health")
+    statSelect = ttk.Combobox(inputDataFrame, textvariable=statString2)
+    statSelect.grid(row=2,column=0)
+    statSelect['values'] = statList
     
     Button(inputDataFrame, text="Select",
            command=lambda: selectButton(champSelect.get(), charList)).grid(row=1, column=1)
     
     Button(inputDataFrame, text="Graph",
-           command=lambda: plotChamp(inputDataFrame)).grid(row=2, column=1)
-    
-    statSelect = ttk.Combobox(inputDataFrame, textvariable="Select Stat")
-    statSelect.grid(row=2,column=0)
-    statSelect['values'] = statList
+           command=lambda: plotChamp(inputDataFrame, statSelect.get())).grid(row=2, column=1)
     
     Button(inputDataFrame, text="Clear",
            command=lambda: clearButton(charList)).grid(row=3, column=1)
