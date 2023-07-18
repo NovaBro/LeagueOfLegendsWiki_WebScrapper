@@ -13,6 +13,8 @@ champListLabel = "No Champions Selected"
 statList = ["Health", "Mana", "Health Regen", "Mana Regen", "Armor", "Attack", "Magic Resist"]
 xlvls = np.arange(1,19)
 numOfStats = 1
+currentChampStats = []
+needUpdate = True
 
 def generateSubplots(fig:plt.figure):
     subplotList = []
@@ -23,26 +25,52 @@ def generateSubplots(fig:plt.figure):
 
 def plotChamp(inputDataFrame:ttk.Frame, statSelected:str):
     #TODO: EDIT Get More Stats
-    global selectedNames, champData, xlvls, statList
+    global selectedNames, champData, xlvls, statList, currentChampStats, needUpdate
+
+    if needUpdate:
+        fig = plt.figure(figsize=(10,8))
+        subplotList = generateSubplots(fig)
+        currentChampStats.clear()
+
+        for c in range(len(selectedNames)):#TODO: EDIT THIS FOR MORE STATS
+            champStats = scp.getSpecChampStats(selectedNames[c])
+            currentChampStats.append(champStats)
+
+            for i in range(numOfStats):
+                i = statList.index(statSelected)
+                newPlot = subplotList[0]
+                line, = newPlot.step(xlvls, champStats[:, i], where="pre")
+                line.set_label(selectedNames[c])
+
+                newPlot.legend()
+                newPlot.set_title(statList[i])
+                newPlot.set_xticks(range(0, 20))
+
+        canvas = FigureCanvasTkAgg(fig, inputDataFrame)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=0, column=2, rowspan=40)
+        needUpdate = False
+    else:
+        changeStatGraph(inputDataFrame, statSelected)
+
+def changeStatGraph(inputDataFrame:ttk.Frame, statSelected:str):
+    global currentChampStats
+    i = statList.index(statSelected)
     fig = plt.figure(figsize=(10,8))
-    subplotList = generateSubplots(fig)
+    newPlot = fig.add_subplot(111)
+    for x in range(len(currentChampStats)):
 
-    for c in range(len(selectedNames)):#TODO: EDIT THIS FOR MORE STATS
-        champStats = scp.getSpecChampStats(selectedNames[c])
+        line, = newPlot.step(xlvls, currentChampStats[x][:, i], where="pre")
+        line.set_label(selectedNames[x])
 
-        for i in range(numOfStats):
-            i = statList.index(statSelected)
-            newPlot = subplotList[0]
-            line, = newPlot.step(xlvls, champStats[:, i], where="pre")
-            line.set_label(selectedNames[c])
-
-            newPlot.legend()
-            newPlot.set_title(statList[i])
-            newPlot.set_xticks(range(0, 20))
+        newPlot.legend()
+        newPlot.set_title(statList[i])
+        newPlot.set_xticks(range(0, 20))
 
     canvas = FigureCanvasTkAgg(fig, inputDataFrame)
     canvas.draw()
     canvas.get_tk_widget().grid(row=0, column=2, rowspan=40)
+
 
 def selectButton(name:str, label:Label):
     global selectedNames, champListLabel
@@ -58,11 +86,16 @@ def clearButton(label:Label):
     label.config(text=champListLabel)
     print("clear")
 
+def updateTrue(eventobj):
+    global needUpdate
+    needUpdate = True
+    print(eventobj)
+
 def genInterface():
-    global champNames, selectedNames
+    global champNames, selectedNames, needUpdate
     
     root = Tk()
-    root.geometry("1200x800")
+    root.geometry("1400x800")
     root.title("LOL STATS")
 
     inputDataFrame = ttk.Frame(root)
@@ -76,6 +109,8 @@ def genInterface():
     champSelect.grid(row=1,column=0)
     champSelect['values'] = champNames
     #NOTE: cannot store the get() value of combobox in variable here for some reason... must get it """""fresh"""""
+    champSelect.bind('<<ComboboxSelected>>', func=updateTrue)
+    #ListboxSelect
 
     charList = Label(inputDataFrame)
     charList.config(text=champListLabel)
@@ -86,11 +121,13 @@ def genInterface():
     statSelect.grid(row=2,column=0)
     statSelect['values'] = statList
     
-    Button(inputDataFrame, text="Select",
+    
+    Button(inputDataFrame, text="Select\nChampion",
            command=lambda: selectButton(champSelect.get(), charList)).grid(row=1, column=1)
     
     Button(inputDataFrame, text="Graph",
            command=lambda: plotChamp(inputDataFrame, statSelect.get())).grid(row=2, column=1)
+    
     
     Button(inputDataFrame, text="Clear",
            command=lambda: clearButton(charList)).grid(row=3, column=1)

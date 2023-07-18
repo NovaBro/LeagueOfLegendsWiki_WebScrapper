@@ -84,21 +84,6 @@ def getSpecChampStats(champName:str):
     driver.quit()
     return champStats
 
-#print(getSpecChampStats("Akali"))
-
-def test():
-    driver = webdriver.Chrome()
-    driver.get("https://leagueoflegends.fandom.com/wiki/List_of_champions")
-    element0 = (driver.find_element(By.CLASS_NAME, "sitenotice-wrapper__header")
-                .find_element(By.TAG_NAME, "svg").find_element(By.TAG_NAME, "use"))
-    element0.click()
-
-    element1 = driver.find_element(By.CLASS_NAME, "mw-redirect")
-    print(element1.text)
-    element1.click()
-    
-    print(driver.current_url)
-
 def getChampList():
     champList = []
     driver = webdriver.Chrome(options=op)
@@ -110,7 +95,4 @@ def getChampList():
         champList.append(attrStr)
         
     driver.quit()
-    #print(tuple(champList))
     return(tuple(champList))
-
-#getChampList()
